@@ -13,6 +13,8 @@ public class DevourerController : PhysicsBehaviour
 
     private void Update()
     {
+        if (Stop) return;
+
         if (Vector3.Distance(transform.position, _player.transform.position) < _eatDistance)
         {
             Eat();

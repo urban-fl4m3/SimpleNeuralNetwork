@@ -8,6 +8,8 @@ public abstract class PhysicsBehaviour : MonoBehaviour
     [SerializeField] protected float force;
     [SerializeField] private float _velocityClamp;
     protected Vector3 forceVector;
+    
+    public bool Stop { protected get; set; }
 
     protected virtual void Awake()
     {

@@ -657,6 +657,8 @@ MonoBehaviour:
   _secondPlace: {fileID: 1148374188}
   _player: {fileID: 252081801}
   _devourer: {fileID: 1815588517}
+  _brainsCount: 10
+  _bestCount: 4
   _inputLayerNodes: 12
   _outputLayerNodes: 3
   _hiddenLayerNodes: 02000000

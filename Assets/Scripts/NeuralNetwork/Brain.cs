@@ -9,6 +9,7 @@ public class Brain
     private Dictionary<string, float> _edges;
     private List<float> _edgeValues;
 
+    public int this[int index] => _nodeCounts[index];
     private readonly int[] _nodeCounts;
     private List<Node>[] _layers;
 
@@ -112,8 +113,6 @@ public class Brain
         for (int layerIndex = 0; layerIndex < _layersCount; layerIndex++)
         {
             List<Node> currentLayer = _layers[layerIndex];
-            List<Node> lastLayer = _layers[layerIndex - 1];
-
             for (int curNodeIndex = 0; curNodeIndex < currentLayer.Count; curNodeIndex++)
             {
                 Node currentNode = currentLayer[curNodeIndex];
@@ -124,6 +123,8 @@ public class Brain
                 }
                 else
                 {
+                    List<Node> lastLayer = _layers[layerIndex - 1];
+
                     float value = 0;
                     foreach (Node lastNode in lastLayer)
                     {
@@ -163,6 +164,23 @@ public class Brain
             _edges[key] = newValues[index];
             index++;
         }
+    }
+
+    private const int quarter = 25;
+    private void Mutate()
+    {
+        int edgesCount = _edges.Count;
+        int quart = (int)(edgesCount * quarter * 0.01f);
+        int iterations = Random.Range(0, quart + 1);
+
+        List<float> edges = GetEdges();
+        for (int i = 0; i < iterations; i++)
+        {
+            int edgeIndex = Random.Range(0, edgesCount);
+            float additionValue = Random.Range(-1.0f, 1.0f);
+            edges[edgeIndex] += additionValue;
+        }
+        SetEdges(edges);
     }
 
     private static float ActivateValue(float value) => value < 0 ? value * 0.01f : value;

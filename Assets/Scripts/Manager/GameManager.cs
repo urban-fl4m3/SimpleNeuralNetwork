@@ -45,6 +45,9 @@ public class GameManager : MonoBehaviour
         _tempValues[9] = enemyPosition.position.x;
         _tempValues[10] = enemyPosition.position.y;
         _tempValues[11] = enemyPosition.position.z;
+
+        float[] result = _neuralNetwork.Process(_tempValues);
+        Vector3 newForce = new Vector3(result[0], result[1], result[2]);
     }
 
     private void StartGame()

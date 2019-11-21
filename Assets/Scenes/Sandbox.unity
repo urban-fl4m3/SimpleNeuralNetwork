@@ -658,7 +658,7 @@ MonoBehaviour:
   _player: {fileID: 252081801}
   _devourer: {fileID: 1815588517}
   _inputLayerNodes: 12
-  _outputLayerNodes: 2
+  _outputLayerNodes: 3
   _hiddenLayerNodes: 02000000
 --- !u!1 &1496566545
 GameObject:

@@ -3,6 +3,7 @@
 public abstract class PhysicsBehaviour : MonoBehaviour
 {
     public Rigidbody RigidBody { get; private set; }
+    public float MaxVelocity => _velocityClamp;
 
     [SerializeField] protected float force;
     [SerializeField] private float _velocityClamp;

@@ -21,7 +21,7 @@ public class UIManager : MonoBehaviour
 
     public void SetLifeTime(float value)
     {
-        if (!(value > _maxLifeTime)) return;
+        if (value < _maxLifeTime) return;
         _maxLifeTime = value;
         _lifeTimeText.text = _maxLifeTime.ToString();
     }

@@ -4,12 +4,6 @@ using UnityEngine;
 
 public class GameManager : MonoBehaviour
 {
-    [SerializeField] private Transform _fistPlace;
-    [SerializeField] private Transform _secondPlace;
-
-    [SerializeField] private PlayerController _player;
-    [SerializeField] private PhysicsBehaviour _devourer;
-
     [Header("Neural Network Values")]
     [SerializeField] private int _brainsCount;
     [SerializeField] private int _bestCount;
@@ -17,66 +11,62 @@ public class GameManager : MonoBehaviour
     [SerializeField] private int _outputLayerNodes;
     [SerializeField] private int[] _hiddenLayerNodes;
 
+    private List<Game> _activeGames;
+    [SerializeField] private Game _gamePrefab;
+
     private Brain[] _neuralNetworks;
     private float[] _lifetimes;
-    private int _currentIndex;
+
+    private int _completedEncounters;
+
+    private int _generationCount;
 
     private void Awake()
     {
-        _devourer.GetComponent<DevourerController>().SetOnEatAction(StartGame);
-
-        _currentIndex = 0;
+        _generationCount = 0;
+        _completedEncounters = 0;
+        
+        _activeGames = new List<Game>();
         _neuralNetworks = new Brain[_brainsCount];
         _lifetimes = new float[_brainsCount];
 
         for (int brainIndex = 0; brainIndex < _brainsCount; brainIndex++)
         {
-            _neuralNetworks[brainIndex] = new Brain(_inputLayerNodes, _outputLayerNodes, _hiddenLayerNodes);
+            Brain brain = new Brain(_inputLayerNodes, _outputLayerNodes, _hiddenLayerNodes);
+            _neuralNetworks[brainIndex] = brain;
+
+            Game newGame = Instantiate(_gamePrefab, new Vector3(brainIndex * 100, 0, 0), Quaternion.identity, transform);
+            newGame.Initialize(brainIndex, CompleteEncounter);
+            _activeGames.Add(newGame);
         }
 
-        StartGame();
+        StartGames();
     }
 
-    private void StartGame()
+    private void StartGames()
     {
-        ResetStates();
+        for (int gameIndex = 0; gameIndex < _activeGames.Count; gameIndex++)
+        {
+            _activeGames[gameIndex].StartGame(_neuralNetworks[gameIndex]);
+        }
+
+        _generationCount++;
+        Debug.Log(_generationCount);
     }
 
-    private void MovePermission(bool p)
+    private void CompleteEncounter(Game game)
     {
-        PhysicsBehaviour player = _player;
-        player.Stop = !p;
-        _devourer.Stop = !p;
-    }
+        int gameID = game.ID;
+        _lifetimes[gameID] = game.GameTime;
+        _completedEncounters++;
 
-    private void ResetStates()
-    {
-        _player.Initialized = false;
+        UIManager.Instance.SetLifeTime(game.GameTime);
 
-        if (_currentIndex != 0)
-        {
-            _lifetimes[_currentIndex - 1] = _player.LifeTime;
-            //Debug.Log(_player.LifeTime);
+        if (_completedEncounters < _activeGames.Count) return;
 
-            _player.ResetVelocity();
-            _devourer.ResetVelocity();
-        }
-
-        _player.transform.position = _fistPlace.position;
-        _devourer.transform.position = _secondPlace.position;
-
-        if (_currentIndex < _brainsCount)
-        {
-            _player.InitializePlayer(_neuralNetworks[_currentIndex], _devourer);
-            _currentIndex++;
-
-            MovePermission(true);
-        }
-        else
-        {
-            MovePermission(false);
-            NewGenerations();
-        }
+        _completedEncounters = 0;
+        NewGenerations();
+        StartGames();
     }
 
     private void NewGenerations()
@@ -85,11 +75,34 @@ public class GameManager : MonoBehaviour
 
         float lifetimeSum = _lifetimes.Sum();
 
-        List<Brain> bestResults = new List<Brain>();
+        List<Brain> newGeneration = new List<Brain>();
+        List<Brain> roulette = new List<Brain>();
 
         for (int i = 0; i < _neuralNetworks.Length; i++)
         {
-            if (i < _bestCount) bestResults.Add(_neuralNetworks[i]);
+            if (i < _bestCount) newGeneration.Add(_neuralNetworks[i]);
+            int coeff = (int)(_lifetimes[i] / lifetimeSum * 100);
+
+            for (int j = 0; j < coeff; j++)
+            {
+                roulette.Add(_neuralNetworks[i]);
+            }
+        }
+
+        for (int i = 0; i < _brainsCount - _bestCount; i++)
+        {
+            int randIndexF = Random.Range(0, roulette.Count);
+            int randIndexS = Random.Range(0, roulette.Count);
+
+            Brain crossover = Brain.Crossover(roulette[randIndexF], roulette[randIndexS]);
+            newGeneration.Add(crossover);
+        }
+
+        for (int i = _bestCount; i < newGeneration.Count; i++)
+        {
+            Brain gen = newGeneration[i];
+            gen.Mutate();
+            _neuralNetworks[i] = gen;
         }
     }
 
@@ -99,7 +112,7 @@ public class GameManager : MonoBehaviour
         {
             for (int j = i + 1; j < _lifetimes.Length; j++)
             {
-                if (!(_lifetimes[i] < _lifetimes[j])) continue;
+                if (_lifetimes[i] > _lifetimes[j]) continue;
 
                 float tempTime = _lifetimes[i];
                 _lifetimes[i] = _lifetimes[j];

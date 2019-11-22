@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using UnityEngine;
 using Random = UnityEngine.Random;
 
 /// <summary> Representation of neural network system. </summary>
@@ -57,7 +58,9 @@ public class Brain
                 foreach (Node lastNode in lastLayer)
                 {
                     string edgeID = GenerateEdgeID(lastNode.Info, layerNode.Info);
-                    _edges.Add(edgeID, Random.Range(-1.0f, 1.0f));
+
+                    float value = Random.Range(-1.0f, 1.0f);
+                    _edges.Add(edgeID, 0.0f);
                 }
             }
         }
@@ -166,9 +169,13 @@ public class Brain
         }
     }
 
-    private const int quarter = 25;
-    private void Mutate()
+    private const int quarter = 100;
+    private const float mutationChance = 0.1f;
+    public void Mutate()
     {
+        float cont = Random.Range(0.0f, 1.0f);
+        if (cont > mutationChance) return;
+
         int edgesCount = _edges.Count;
         int quart = (int)(edgesCount * quarter * 0.01f);
         int iterations = Random.Range(0, quart + 1);
@@ -179,11 +186,14 @@ public class Brain
             int edgeIndex = Random.Range(0, edgesCount);
             float additionValue = Random.Range(-1.0f, 1.0f);
             edges[edgeIndex] += additionValue;
+            edges[edgeIndex] = Mathf.Clamp(edges[edgeIndex], -1, 1);
         }
+
         SetEdges(edges);
     }
 
-    private static float ActivateValue(float value) => value < 0 ? value * 0.01f : value;
+    private static float ActivateValue(float value) => 2 / (1 + Mathf.Exp(-2 * value)) - 1;
+    //private static float ActivateValue(float value) => value < 0 ? value * 0.01f : value;
 
     /// <summary> Serializing node infos to string format: x:y:z, where
     /// x - layer index of past node,

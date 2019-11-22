@@ -20,6 +20,8 @@ public abstract class PhysicsBehaviour : MonoBehaviour
     public void ResetVelocity() => RigidBody.velocity = Vector3.zero;
     public void ClampVelocity()
     {
-        if (RigidBody.velocity.magnitude > _velocityClamp) RigidBody.velocity = RigidBody.velocity.normalized * _velocityClamp;
+        Vector3 velocity = RigidBody.velocity;
+        velocity.y = 0;
+        RigidBody.velocity = Vector3.ClampMagnitude(velocity, _velocityClamp);
     }
 }

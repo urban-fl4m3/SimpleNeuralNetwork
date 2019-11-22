@@ -3,47 +3,57 @@
 public class PlayerController : PhysicsBehaviour
 {
     private Brain _currentBrain;
-    private PhysicsBehaviour _devourer;
+    private DevourerController _devourer;
     private float[] _tempValues;
 
-    public float LifeTime { get; private set; }
+    public bool Initialized { private get; set; }
 
-    public bool Initialized { get; set; }
-    public void InitializePlayer(Brain brain, PhysicsBehaviour devourer)
+    [SerializeField] private Transform _wallLeft;
+    [SerializeField] private Transform _wallRight;
+    [SerializeField] private Transform _wallTop;
+    [SerializeField] private Transform _wallBot;
+
+    public void InitializePlayer(Brain brain, DevourerController devourer)
     {
         _devourer = devourer;
         _currentBrain = brain;
         _tempValues = new float[brain[0]];
-        LifeTime = 0;
 
         Initialized = true;
     }
 
-    private void Update()
+    private void FixedUpdate()
     {
         if (!Initialized || Stop) return;
 
-        LifeTime += Time.deltaTime;
         var playerVelocity = RigidBody.velocity;
-        _tempValues[0] = (playerVelocity.x / MaxVelocity + 1) / 2;
-        _tempValues[1] = (playerVelocity.y / MaxVelocity + 1) / 2;
-        _tempValues[2] = (playerVelocity.z / MaxVelocity + 1) / 2;
+        _tempValues[0] = playerVelocity.x;
+        _tempValues[1] = playerVelocity.z;
 
         var enemyVelocity = _devourer.RigidBody.velocity;
-        _tempValues[3] = (enemyVelocity.x / _devourer.MaxVelocity + 1) / 2;
-        _tempValues[4] = (enemyVelocity.y / _devourer.MaxVelocity + 1) / 2;
-        _tempValues[5] = (enemyVelocity.z / _devourer.MaxVelocity + 1) / 2;
+        _tempValues[2] = enemyVelocity.x;
+        _tempValues[3] = enemyVelocity.z;
 
         var playerPosition = transform.position;
-        _tempValues[6] = (playerPosition.x / MaxVelocity + 1) / 2;
-        _tempValues[7] = (playerPosition.y / MaxVelocity + 1) / 2;
-        _tempValues[8] = (playerPosition.z / MaxVelocity + 1) / 2;
+        _tempValues[4] = playerPosition.x;
+        _tempValues[5] = playerPosition.z;
 
-        var enemyPosition = _devourer.transform;
-        var position = enemyPosition.position;
-        _tempValues[9] = (position.x / _devourer.MaxVelocity + 1) / 2;
-        _tempValues[10] = (position.x / _devourer.MaxVelocity + 1) / 2;
-        _tempValues[11] = (position.x / _devourer.MaxVelocity + 1) / 2;
+        var enemyPosition = _devourer.transform.position;
+        _tempValues[6] = enemyPosition.x;
+        _tempValues[7] = enemyPosition.z;
+
+        var leftDistance = playerPosition.x - _wallLeft.position.x;
+        var rightDistance = _wallRight.position.x - playerPosition.x;
+        var topDistance = _wallTop.position.z - playerPosition.z;
+        var botDistance = playerPosition.z - _wallBot.position.z;
+        var enemyDistance = Vector3.Distance(playerPosition, enemyPosition);
+
+        _tempValues[8] = leftDistance;
+        _tempValues[9] = rightDistance;
+        _tempValues[10] = topDistance;
+        _tempValues[11] = botDistance;
+        _tempValues[12] = enemyDistance;
+        //_tempValues[13] = _devourer.EatDistance;
 
         float[] result = _currentBrain.Process(_tempValues);
         float forceX = (result[0] * 2 - 1) * MaxVelocity;
@@ -51,7 +61,7 @@ public class PlayerController : PhysicsBehaviour
         float forceZ = (result[2] * 2 - 1) * MaxVelocity;
 
         Vector3 newForce = new Vector3(forceX, forceY, forceZ);
-
+        RigidBody.velocity = newForce;
         ClampVelocity();
     }
 

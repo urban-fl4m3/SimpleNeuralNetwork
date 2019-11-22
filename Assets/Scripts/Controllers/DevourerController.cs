@@ -6,12 +6,14 @@ public class DevourerController : PhysicsBehaviour
     [SerializeField] private PlayerController _player;
 
     [SerializeField] private float _forceFade;
+
+    public float EatDistance => _eatDistance;
     [SerializeField] private float _eatDistance;
 
     public void SetOnEatAction(Action a) => _onEat += a;
     private Action _onEat;
 
-    private void Update()
+    private void FixedUpdate()
     {
         if (Stop) return;
 

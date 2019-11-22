@@ -22,10 +22,17 @@ public class PlayerController : PhysicsBehaviour
         Initialized = true;
     }
 
-    private void FixedUpdate()
+    private void Update()
     {
         if (!Initialized || Stop) return;
 
+        NeuronsMove();
+        //KeyMove();
+        ClampVelocity();
+    }
+
+    private void NeuronsMove()
+    {
         var playerVelocity = RigidBody.velocity;
         _tempValues[0] = playerVelocity.x;
         _tempValues[1] = playerVelocity.z;
@@ -53,7 +60,7 @@ public class PlayerController : PhysicsBehaviour
         _tempValues[10] = topDistance;
         _tempValues[11] = botDistance;
         _tempValues[12] = enemyDistance;
-        //_tempValues[13] = _devourer.EatDistance;
+        _tempValues[13] = _devourer.EatDistance;
 
         float[] result = _currentBrain.Process(_tempValues);
         float forceX = (result[0] * 2 - 1) * MaxVelocity;
@@ -62,7 +69,6 @@ public class PlayerController : PhysicsBehaviour
 
         Vector3 newForce = new Vector3(forceX, forceY, forceZ);
         RigidBody.velocity = newForce;
-        ClampVelocity();
     }
 
     /// <summary> Control player with keyboard for physics test.
@@ -72,25 +78,25 @@ public class PlayerController : PhysicsBehaviour
     {
         if (Input.GetKey(KeyCode.W))
         {
-            forceVector.z += force;
+            forceVector.z += MaxVelocity;
         }
 
         if (Input.GetKey(KeyCode.S))
         {
-            forceVector.z -= force;
+            forceVector.z -= MaxVelocity;
         }
 
         if (Input.GetKey(KeyCode.D))
         {
-            forceVector.x += force;
+            forceVector.x += MaxVelocity;
         }
 
         if (Input.GetKey(KeyCode.A))
         {
-            forceVector.x -= force;
+            forceVector.x -= MaxVelocity;
         }
 
-        RigidBody.AddForce(forceVector);
+        RigidBody.velocity = forceVector;
         forceVector = Vector3.zero;
     }
 }

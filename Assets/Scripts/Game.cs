@@ -4,7 +4,10 @@ using UnityEngine;
 public class Game : MonoBehaviour
 {
     public int ID { get; private set; }
+    public bool IsPlaying { get; private set; }
 
+    public Transform CameraPlace => _cameraPlace;
+    [SerializeField] private Transform _cameraPlace;
     [SerializeField] private Transform _firstPlace;
     [SerializeField] private Transform _secondPlace;
 
@@ -27,10 +30,23 @@ public class Game : MonoBehaviour
 
     public void StartGame(Brain playerBrain)
     {
+        IsPlaying = true;
         GameTime = Time.time;
         Player.InitializePlayer(playerBrain, (DevourerController)_devourer);
         MovePermission(true);
         ResetAll();
+    }
+
+    public void StopGame()
+    {
+        IsPlaying = false;
+        MovePermission(false);
+        GameTime = Time.time - GameTime;
+
+        _player.Initialized = false;
+
+        ResetAll();
+        _onStop?.Invoke(this);
     }
 
     private void ResetAll()
@@ -40,17 +56,6 @@ public class Game : MonoBehaviour
 
         _player.transform.position = _firstPlace.position;
         _devourer.transform.position = _secondPlace.position;
-    }
-
-    public void StopGame()
-    {
-        MovePermission(false);
-        GameTime = Time.time - GameTime;
-
-        _player.Initialized = false;
-
-        ResetAll();
-        _onStop?.Invoke(this);
     }
 
     private void MovePermission(bool p)

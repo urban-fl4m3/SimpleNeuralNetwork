@@ -4,6 +4,8 @@ using UnityEngine;
 
 public class GameManager : MonoBehaviour
 {
+    [SerializeField] private Camera _mainCamera;
+
     [Header("Neural Network Values")]
     [SerializeField] private int _brainsCount;
     [SerializeField] private int _bestCount;
@@ -18,14 +20,14 @@ public class GameManager : MonoBehaviour
     private float[] _lifetimes;
 
     private int _completedEncounters;
-
     private int _generationCount;
+    private int _cameraIndex;
 
     private void Awake()
     {
         _generationCount = 0;
         _completedEncounters = 0;
-        
+
         _activeGames = new List<Game>();
         _neuralNetworks = new Brain[_brainsCount];
         _lifetimes = new float[_brainsCount];
@@ -45,13 +47,16 @@ public class GameManager : MonoBehaviour
 
     private void StartGames()
     {
+        _cameraIndex = 0;
+        _mainCamera.transform.position = _activeGames[0].CameraPlace.position;
+
         for (int gameIndex = 0; gameIndex < _activeGames.Count; gameIndex++)
         {
             _activeGames[gameIndex].StartGame(_neuralNetworks[gameIndex]);
         }
 
         _generationCount++;
-        Debug.Log(_generationCount);
+        UIManager.Instance.SetGeneration(_generationCount);
     }
 
     private void CompleteEncounter(Game game)
@@ -61,6 +66,17 @@ public class GameManager : MonoBehaviour
         _completedEncounters++;
 
         UIManager.Instance.SetLifeTime(game.GameTime);
+
+        if (_cameraIndex == gameID)
+        {
+            foreach (Game activeGame in _activeGames)
+            {
+                if (!activeGame.IsPlaying) continue;
+                _mainCamera.transform.position = activeGame.CameraPlace.position;
+                _cameraIndex = activeGame.ID;
+                break;
+            }
+        }
 
         if (_completedEncounters < _activeGames.Count) return;
 

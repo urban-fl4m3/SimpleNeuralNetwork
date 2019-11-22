@@ -11,6 +11,8 @@ public class UIManager : MonoBehaviour
     [SerializeField] private TextMeshProUGUI _lifeTimeText;
     private float _maxLifeTime;
 
+    [SerializeField] private TextMeshProUGUI _generationText;
+
     private void Awake()
     {
         Instance = this;
@@ -23,4 +25,6 @@ public class UIManager : MonoBehaviour
         _maxLifeTime = value;
         _lifeTimeText.text = _maxLifeTime.ToString();
     }
+
+    public void SetGeneration(int generation) => _generationText.text = generation.ToString();
 }

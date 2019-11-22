@@ -13,7 +13,7 @@ public class DevourerController : PhysicsBehaviour
     public void SetOnEatAction(Action a) => _onEat += a;
     private Action _onEat;
 
-    private void FixedUpdate()
+    private void Update()
     {
         if (Stop) return;
 

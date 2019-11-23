@@ -15,6 +15,9 @@ public class Game : MonoBehaviour
     [SerializeField] private PlayerController _player;
     [SerializeField] private PhysicsBehaviour _devourer;
 
+    public Transform LeftClamp;
+    public Transform BotClamp;
+
     public float GameTime { get; private set; }
 
     private Action<Game> _onStop; 
@@ -28,13 +31,13 @@ public class Game : MonoBehaviour
         MovePermission(false);
     }
 
-    public void StartGame(Brain playerBrain)
+    public void StartGame(Brain playerBrain, Vector3 playerPosition, Vector3 devourerPosition)
     {
         IsPlaying = true;
         GameTime = Time.time;
         Player.InitializePlayer(playerBrain, (DevourerController)_devourer);
         MovePermission(true);
-        ResetAll();
+        ResetAll(playerPosition, devourerPosition);
     }
 
     public void StopGame()
@@ -49,13 +52,29 @@ public class Game : MonoBehaviour
         _onStop?.Invoke(this);
     }
 
-    private void ResetAll()
+    private void ResetAll(Vector3? playerPos = null, Vector3? devourerPos = null)
     {
         _player.ResetVelocity();
         _devourer.ResetVelocity();
 
-        _player.transform.position = _firstPlace.position;
-        _devourer.transform.position = _secondPlace.position;
+        Vector3 newPlayerPos = _firstPlace.position;
+        if (playerPos != null)
+        {
+            newPlayerPos = playerPos.Value;
+            newPlayerPos.x += LeftClamp.position.x;
+            newPlayerPos.z += BotClamp.position.z;
+         
+        }
+        _player.transform.position = newPlayerPos;
+
+        Vector3 newDevourerPos = _secondPlace.position;
+        if (devourerPos != null)
+        {
+            newDevourerPos = devourerPos.Value;
+            newDevourerPos.x += LeftClamp.position.x;
+            newDevourerPos.z += BotClamp.position.z;
+        }
+        _devourer.transform.position = newDevourerPos;
     }
 
     private void MovePermission(bool p)

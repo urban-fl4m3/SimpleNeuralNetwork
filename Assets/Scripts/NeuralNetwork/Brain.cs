@@ -169,8 +169,8 @@ public class Brain
         }
     }
 
-    private const int quarter = 100;
-    private const float mutationChance = 0.1f;
+    private const int quarter = 50;
+    private const float mutationChance = 0.2f;
     public void Mutate()
     {
         float cont = Random.Range(0.0f, 1.0f);

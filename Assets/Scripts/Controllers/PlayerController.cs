@@ -53,14 +53,13 @@ public class PlayerController : PhysicsBehaviour
         var rightDistance = _wallRight.position.x - playerPosition.x;
         var topDistance = _wallTop.position.z - playerPosition.z;
         var botDistance = playerPosition.z - _wallBot.position.z;
-        var enemyDistance = Vector3.Distance(playerPosition, enemyPosition);
+        var enemyDistance = Vector3.Distance(playerPosition, enemyPosition) - _devourer.EatDistance;
 
         _tempValues[8] = leftDistance;
         _tempValues[9] = rightDistance;
         _tempValues[10] = topDistance;
         _tempValues[11] = botDistance;
         _tempValues[12] = enemyDistance;
-        _tempValues[13] = _devourer.EatDistance;
 
         float[] result = _currentBrain.Process(_tempValues);
         float forceX = (result[0] * 2 - 1) * MaxVelocity;

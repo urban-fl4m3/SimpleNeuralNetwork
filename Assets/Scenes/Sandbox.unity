@@ -1048,9 +1048,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _mainCamera: {fileID: 963194227}
+  _minimumDistance: 10
+  _spawnRangeX: {x: 10, y: 36}
+  _spawnRangeZ: {x: 10, y: 36}
   _brainsCount: 40
-  _bestCount: 4
-  _inputLayerNodes: 14
+  _bestCount: 5
+  _inputLayerNodes: 13
   _outputLayerNodes: 3
   _hiddenLayerNodes: 12000000
   _gamePrefab: {fileID: 1929977653962391798, guid: abbb4b2f0b1ce8e47a5fde87a70db060,

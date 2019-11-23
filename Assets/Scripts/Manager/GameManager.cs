@@ -6,6 +6,11 @@ public class GameManager : MonoBehaviour
 {
     [SerializeField] private Camera _mainCamera;
 
+    [Header("Random subjects spawn generator")]
+    [SerializeField] private float _minimumDistance;
+    [SerializeField] private Vector2 _spawnRangeX;
+    [SerializeField] private Vector2 _spawnRangeZ;
+
     [Header("Neural Network Values")]
     [SerializeField] private int _brainsCount;
     [SerializeField] private int _bestCount;
@@ -49,14 +54,35 @@ public class GameManager : MonoBehaviour
     {
         _cameraIndex = 0;
         _mainCamera.transform.position = _activeGames[0].CameraPlace.position;
+        (Vector3 playerPosition, Vector3 devourerPosition) = GetRandomPositions();
 
         for (int gameIndex = 0; gameIndex < _activeGames.Count; gameIndex++)
         {
-            _activeGames[gameIndex].StartGame(_neuralNetworks[gameIndex]);
+            _activeGames[gameIndex].StartGame(_neuralNetworks[gameIndex], playerPosition, devourerPosition);
         }
 
         _generationCount++;
         UIManager.Instance.SetGeneration(_generationCount);
+    }
+
+    private (Vector3, Vector3) GetRandomPositions()
+    {
+        while (true)
+        {
+            float playerX = Random.Range(_spawnRangeX.x, _spawnRangeX.y);
+            float devourerX = Random.Range(_spawnRangeX.x, _spawnRangeX.y);
+
+            float playerZ = Random.Range(_spawnRangeZ.x, _spawnRangeZ.y);
+            float devourerZ = Random.Range(_spawnRangeZ.x, _spawnRangeZ.y);
+
+            Vector3 firstPos = new Vector3(playerX, 0.5f, playerZ);
+            Vector3 secondPos = new Vector3(devourerX, 0.5f, devourerZ);
+
+            if (Vector3.Distance(firstPos, secondPos) > _minimumDistance)
+            {
+                return (firstPos, secondPos);
+            }
+        }
     }
 
     private void CompleteEncounter(Game game)
